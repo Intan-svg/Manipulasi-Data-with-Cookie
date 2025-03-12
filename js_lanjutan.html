@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manipulasi Tabel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .actions {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .delete-button {
+            background-color: #d9534f;
+        }
+        .delete-button:hover {
+            background-color: #c9302c;
+        }
+    </style>
+</head>
+<body>
+    <h2>Daftar Kawan Kampus</h2>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>NIM</th>
+                <th>Nama</th>
+                <th>Kelas</th>
+                <th>Prodi</th>
+                <th>Alamat</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button onclick="addRow()">Tambah Data</button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", loadTable);
+
+        function saveTable() {
+            localStorage.setItem("tableData", document.getElementById("data-table").innerHTML);
+        }
+
+        function loadTable() {
+            let savedData = localStorage.getItem("tableData");
+            if (savedData) {
+                document.getElementById("data-table").innerHTML = savedData;
+                document.querySelectorAll("td[ondblclick]").forEach(td => {
+                    td.ondblclick = function () { editCell(this); };
+                });
+                document.querySelectorAll(".delete-button").forEach(button => {
+                    button.onclick = function () { deleteRow(this); };
+                });
+                updateNumbers();
+            } else {
+                addRow();
+            }
+        }
+
+        function editCell(cell) {
+            if (cell.querySelector('input')) return;
+            let oldValue = cell.innerText;
+            let input = document.createElement('input');
+            input.type = 'text';
+            input.value = oldValue;
+            input.className = 'edit-input';
+            let okButton = document.createElement('button');
+            okButton.innerText = 'OK';
+            okButton.onclick = function () { saveEdit(cell, input.value); };
+            let cancelButton = document.createElement('button');
+            cancelButton.innerText = 'Cancel';
+            cancelButton.onclick = function () { cell.innerHTML = oldValue; };
+            cell.innerHTML = '';
+            cell.appendChild(input);
+            cell.appendChild(okButton);
+            cell.appendChild(cancelButton);
+            input.focus();
+        }
+
+        function saveEdit(cell, newValue) {
+            cell.innerHTML = newValue;
+            saveTable();
+        }
+
+        function deleteRow(button) {
+            let row = button.closest('tr');
+            row.remove();
+            updateNumbers();
+            saveTable();
+        }
+
+        function addRow() {
+            let table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+            let row = table.insertRow();
+            let noCell = row.insertCell(0);
+            let nimCell = row.insertCell(1);
+            let namaCell = row.insertCell(2);
+            let kelasCell = row.insertCell(3);
+            let prodiCell = row.insertCell(4);
+            let alamatCell = row.insertCell(5);
+            let aksiCell = row.insertCell(6);
+
+            noCell.innerText = table.rows.length;
+            nimCell.innerText = '000000000';
+            nimCell.setAttribute('ondblclick', "editCell(this)");
+            namaCell.innerText = 'Nama Baru';
+            namaCell.setAttribute('ondblclick', "editCell(this)");
+            kelasCell.innerText = 'Kelas';
+            kelasCell.setAttribute('ondblclick', "editCell(this)");
+            prodiCell.innerText = 'Prodi';
+            prodiCell.setAttribute('ondblclick', "editCell(this)");
+            alamatCell.innerText = 'Alamat';
+            alamatCell.setAttribute('ondblclick', "editCell(this)");
+            aksiCell.className = 'actions';
+            let deleteButton = document.createElement('button');
+            deleteButton.innerText = 'Delete';
+            deleteButton.className = 'delete-button';
+            deleteButton.onclick = function () { deleteRow(this); };
+            aksiCell.appendChild(deleteButton);
+            updateNumbers();
+            saveTable();
+        }
+
+        function updateNumbers() {
+            let rows = document.querySelectorAll('#data-table tbody tr');
+            rows.forEach((row, index) => {
+                row.cells[0].innerText = index + 1;
+            });
+        }
+    </script>
+</body>
+</html>
